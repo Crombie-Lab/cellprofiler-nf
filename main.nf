@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 // Use DSL2
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 // QUEST nextflow version message
 if( !nextflow.version.matches('>20.0') ) {
