@@ -37,8 +37,8 @@ meta1 <- tibble::tibble(file = list.files(path = raw_imagesDir),
   dplyr::select(-TIF) %>%
   dplyr::mutate(row = stringr::str_extract(well, pattern = "[A-Z]"),
                 col = stringr::str_extract(well, pattern = "[0-9][0-9]"),
-                Image_PathName_wellmask_98.png = stringr::str_replace(args[2], pattern = "([^/]+$)", replacement = ""),
-                Image_FileName_wellmask_98.png = stringr::str_extract(args[2], pattern = "([^/]+$)"))
+                Image_PathName_wellmask = stringr::str_replace(args[2], pattern = "([^/]+$)", replacement = ""),
+                Image_FileName_wellmask = stringr::str_extract(args[2], pattern = "([^/]+$)"))
 
 # add group
 groups <- stringr::str_split(args[3], pattern = ",")[[1]]
@@ -54,8 +54,8 @@ meta2 <- meta1 %>%
                 Metadata_Magnification = mag,
                 Image_FileName_RawBF = file,
                 Image_PathName_RawBF,
-                Image_FileName_wellmask_98.png,
-                Image_PathName_wellmask_98.png)
+                Image_FileName_wellmask,
+                Image_PathName_wellmask)
 
 write.table(meta2, file = glue::glue("metadata.csv"), quote=FALSE, sep=',', row.names = F)
 
