@@ -79,7 +79,7 @@ C E L L P R O F I L E R - N F   P I P E L I N E
     log.info "CP pipeline       = ${params.pipeline}"
     log.info "Groups            = ${params.groups}"
     log.info "Output            = ${params.out}"
-    log.ingo "mask              = ${params.mask}"
+    log.info "mask              = ${params.mask}"
     log.info ""
     } else {
 log.info '''
