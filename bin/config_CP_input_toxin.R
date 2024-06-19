@@ -16,8 +16,8 @@ library(data.table)
 # 3 - the group argument from main.nf - default is "plate,well"
 # 4 - the edited pipeline path
 # 5 - the out path
-# args <- c("~/repos/cellprofiler-nf/projects/20240613_test3", "~/repos/cellprofiler-nf/input_data/well_masks/20240618_well_mask.png",
-#          "plate,well", "/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09/pipelines/pipeline.cppipe", "/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09/CP_output")
+ args <- c("~/repos/cellprofiler-nf/projects/20240613_test3", "~/repos/cellprofiler-nf/input_data/well_masks/20240618_well_mask.png",
+          "plate,well", "/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09/pipelines/pipeline.cppipe", "/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09/CP_output")
 args <- commandArgs(trailingOnly = TRUE)
 
 #==============================================================================#
@@ -28,6 +28,9 @@ projName <- stringr::str_extract(projDir, pattern = "([^/]+$)")
 
 raw_imagesDir <- paste0(projDir, "/raw_images")
 
+# get mask name
+mask_name <- stringr::str_extract(args[2], pattern = "([^/]+$)")
+
 # parse file names from directory - need wavelength in file name
 meta1 <- tibble::tibble(file = list.files(path = raw_imagesDir),
                         file_path = list.files(path = raw_imagesDir, full.names = T)) %>%
@@ -37,13 +40,18 @@ meta1 <- tibble::tibble(file = list.files(path = raw_imagesDir),
   dplyr::select(-TIF) %>%
   dplyr::mutate(row = stringr::str_extract(well, pattern = "[A-Z]"),
                 col = stringr::str_extract(well, pattern = "[0-9][0-9]"),
-                Image_PathName_wellmask = stringr::str_replace(args[2], pattern = "([^/]+$)", replacement = ""),
-                Image_FileName_wellmask = stringr::str_extract(args[2], pattern = "([^/]+$)"))
+                mask_file = mask_name,
+                mask_path = stringr::str_replace(args[2], pattern = "([^/]+$)", replacement = ""))
+
+# make flexible mask names
+names(meta1)[[10]] <- paste0("Image_FileName_", mask_name)
+names(meta1)[[11]] <- paste0("Image_PathName_", mask_name)
 
 # add group
 groups <- stringr::str_split(args[3], pattern = ",")[[1]]
 meta1$group <- apply( meta1[, groups], 1, paste, collapse = "_")
 
+# put it all together
 meta2 <- meta1 %>%
   dplyr::mutate(Image_PathName_RawBF = stringr::str_replace(file_path, pattern = "([^/]+$)", replacement = "")) %>%
   dplyr::select(Metadata_Experiment = exp,
@@ -54,8 +62,7 @@ meta2 <- meta1 %>%
                 Metadata_Magnification = mag,
                 Image_FileName_RawBF = file,
                 Image_PathName_RawBF,
-                Image_FileName_wellmask,
-                Image_PathName_wellmask)
+                10, 11) # could clean up the order to be more tidy
 
 write.table(meta2, file = glue::glue("metadata.csv"), quote=FALSE, sep=',', row.names = F)
 
