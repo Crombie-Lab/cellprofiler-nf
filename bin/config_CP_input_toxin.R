@@ -12,11 +12,11 @@ library(data.table)
 # Arguments
 #==============================================================================#
 # 1 - full path to project directory
-# 2 - the path to the well_mask - HARDCODE NOW
+# 2 - the path to the well_mask - HARDCODE NOW NEED TO UPDATE IN main.nf!
 # 3 - the group argument from main.nf - default is "plate,well"
 # 4 - the edited pipeline path
 # 5 - the out path
-# args <- c("/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09", "/projects/b1059/projects/Tim/cellprofiler-nf/input_data/well_masks/wellmask_98.png",
+# args <- c("~/repos/cellprofiler-nf/projects/20240613_test3", "~/repos/cellprofiler-nf/input_data/well_masks/20240618_well_mask.png",
 #          "plate,well", "/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09/pipelines/pipeline.cppipe", "/projects/b1059/projects/Tim/cellprofiler-nf/projects/20220128_GWA09/CP_output")
 args <- commandArgs(trailingOnly = TRUE)
 
@@ -32,8 +32,7 @@ raw_imagesDir <- paste0(projDir, "/raw_images")
 meta1 <- tibble::tibble(file = list.files(path = raw_imagesDir),
                         file_path = list.files(path = raw_imagesDir, full.names = T)) %>%
   dplyr::mutate(copy = file) %>%
-  tidyr::separate(col = copy, into = c("date","exp","plate","mag"), sep = "-") %>%
-  tidyr::separate(col = mag, into = c("mag","well"), sep = "_") %>%
+  tidyr::separate(col = copy, into = c("date","exp","plate","mag", "well"), sep = "-|_") %>%
   tidyr::separate(col = well, into = c("well","TIF"), sep = "[.]") %>%
   dplyr::select(-TIF) %>%
   dplyr::mutate(row = stringr::str_extract(well, pattern = "[A-Z]"),

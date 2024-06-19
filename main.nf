@@ -53,9 +53,10 @@ params.help = null
 params.debug = null
 params.project = null
 params.groups = "plate,well"
+params.mask = "20240618_well_mask.png"
 params.data_dir = "${workflow.projectDir}/input_data" // this is different for gcp
 params.bin_dir = "${workflow.projectDir}/bin" // this is different for gcp
-params.well_mask = "${params.data_dir}/well_masks/wellmask_98.png"
+params.well_mask = "${params.data_dir}/well_masks/${params.mask}"
 params.out = "${params.project}/Analysis-${date}"
 params.raw_pipe_dir = "${params.data_dir}/CP_pipelines"
 params.raw_pipe = "${params.raw_pipe_dir}/${pipe}.cppipe"
@@ -78,6 +79,7 @@ C E L L P R O F I L E R - N F   P I P E L I N E
     log.info "CP pipeline       = ${params.pipeline}"
     log.info "Groups            = ${params.groups}"
     log.info "Output            = ${params.out}"
+    log.ingo "mask              = ${params.mask}"
     log.info ""
     } else {
 log.info '''
@@ -95,6 +97,7 @@ C E L L P R O F I L E R - N F   P I P E L I N E
     log.info "Optional arguments:"
     log.info "--groups                       comma separated metadata groupings for CellProfiler, default is plate,well"
     log.info "--outdir                       Output directory to place files, default is project/Analysis-{current date}"
+    log.info "--mask                         The .png file to use as a well mask in input_data/well_masks/, default is 20240618_well_mask.png"
     log.info "--help                         This usage statement."
         exit 1
     }
@@ -155,6 +158,7 @@ workflow {
         .combine(Channel.from(worm_model4)) // edit here
         .combine(Channel.fromPath("${params.bin_dir}/config_CP_input_toxin.R"))
         .combine(Channel.from("${params.project}"))
+        .combine(Channel.from("${params.mask}"))
         .combine(Channel.from("${params.well_mask}"))
         .combine(Channel.from("${params.groups}"))
         .combine(Channel.from("${params.edited_pipe}"))
@@ -224,7 +228,7 @@ process config_CP_input_toxin {
 
     input:
         tuple file(raw_pipe), val(meta_dir), val(meta), val(model_dir), val(model1), val(model2), val(model3), val(model4),
-        file(config_script), val(project), val(mask), val(group), val(edited_pipe), val(out)
+        file(config_script), val(project), val(mask), val(mask_path), val(group), val(edited_pipe), val(out)
 
     output:
         path "*.cppipe", emit: cp_pipeline_file
@@ -236,6 +240,7 @@ process config_CP_input_toxin {
         # Configure the raw pipeline for CellProfiler
         awk '{gsub(/METADATA_DIR/,"${meta_dir}"); print}' ${raw_pipe} | \\
         awk '{gsub(/METADATA_CSV_FILE/,"${meta}"); print}' | \\
+        awk '{gsub(/WELL_MASK/,"${mask}"); print}' | \\
         awk '{gsub(/WORM_MODEL_DIR/,"${model_dir}"); print}' | \\
         awk '{gsub(/MODEL1_XML_FILE/,"${model1}"); print}' | \\
         awk '{gsub(/MODEL2_XML_FILE/,"${model2}"); print}' | \\
@@ -243,7 +248,7 @@ process config_CP_input_toxin {
         awk '{gsub(/MODEL4_XML_FILE/,"${model4}"); print}' > pipeline.cppipe
 
         # Configure metadata and groups for CellProfiller with config_CP_input.R
-        Rscript --vanilla ${config_script} ${project} ${mask} ${group} ${edited_pipe} ${out}
+        Rscript --vanilla ${config_script} ${project} ${mask_path} ${group} ${edited_pipe} ${out}
 
     """
 }

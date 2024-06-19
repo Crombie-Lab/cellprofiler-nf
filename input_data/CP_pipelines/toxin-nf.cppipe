@@ -40,7 +40,7 @@ MaskImage:[module_num:3|svn_version:'Unknown'|variable_revision_number:3|show_wi
     Name the output image:MaskedRaw
     Use objects or an image as a mask?:Image
     Select object for mask:None
-    Select image for mask:wellmask_98.png
+    Select image for mask:WELL_MASK
     Invert the mask?:No
 
 IdentifyPrimaryObjects:[module_num:4|svn_version:'Unknown'|variable_revision_number:15|show_window:False|notes:[]|batch_state:array([], dtype=uint8)|enabled:True|wants_pause:False]
