@@ -27,7 +27,7 @@ if("${params.pipeline}" == "dauer") {
     model_name1 = "dauerMod_NonOverlappingWorms"
     model_name2 = "nondauerMod_NonOverlappingWorms"
 } else if( "${params.pipeline}" == "toxin" ) {
-    pipe = "toxin-nf"
+    pipe = "toxin-nf-keyence" // To process keyence images with edgecorr/edgestrong circa 20241206 use "toxin-nf-keyence_edgestrong"
     worm_model1 = "L4_N2_HB101_100w.xml"
     worm_model2 = "L2L3_N2_HB101_100w.xml"
     worm_model3 = "L1_N2_HB101_100w.xml"
@@ -53,7 +53,7 @@ params.help = null
 params.debug = null
 params.project = null
 params.groups = "plate,well"
-params.mask = "20240618_well_mask.png"
+params.mask = "20250209_well_mask.png"
 params.data_dir = "${workflow.projectDir}/input_data" // this is different for gcp
 params.bin_dir = "${workflow.projectDir}/bin" // this is different for gcp
 params.well_mask = "${params.data_dir}/well_masks/${params.mask}"
