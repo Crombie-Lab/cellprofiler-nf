@@ -4,22 +4,21 @@
 ## Pipeline overview
 ![](img/cellprofiler-nf.drawio.svg)
 
-## QUEST usage
+## ai-panther usage
 ```bash
 # clone the repo
 git clone https://github.com/AndersenLab/cellprofiler-nf.git
 cd cellprofiler-nf
 
-# setup environment
-module load python/anaconda3.6
+# setup environment by loading the singularity module and activating your nextflow conda env
 module load singularity
-source activate /projects/b1059/software/conda_envs/nf20_env/
-
-# example run with dauer pipeline parameter
-nextflow run main.nf --pipeline dauer --project <your repo path>/debug/20220501_dauerDebug
+source activate <path to your nextflow 23.10.0 conda env>
 
 # example run with toxin pipeline parameter
 nextflow run main.nf --pipeline toxin --project <your repo path>/debug/20220501_toxinDebug
+
+# example run with dauer pipeline parameter
+nextflow run main.nf --pipeline dauer --project <your repo path>/debug/20220501_dauerDebug
 ```
 
 ## cellprofiler-nf help
