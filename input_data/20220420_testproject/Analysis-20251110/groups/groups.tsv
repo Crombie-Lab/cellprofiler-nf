@@ -1,0 +1,4 @@
+group	pipeline	output
+Metadata_Group=p002_A01	/home1/hmohammedshe2021/cellprofiler-nf/input_data/20220420_testproject/Analysis-20251110/pipeline/pipeline.cppipe	/home1/hmohammedshe2021/cellprofiler-nf/input_data/20220420_testproject/Analysis-20251110/CP_output/p002_A01
+Metadata_Group=p002_A02	/home1/hmohammedshe2021/cellprofiler-nf/input_data/20220420_testproject/Analysis-20251110/pipeline/pipeline.cppipe	/home1/hmohammedshe2021/cellprofiler-nf/input_data/20220420_testproject/Analysis-20251110/CP_output/p002_A02
+Metadata_Group=p002_B01	/home1/hmohammedshe2021/cellprofiler-nf/input_data/20220420_testproject/Analysis-20251110/pipeline/pipeline.cppipe	/home1/hmohammedshe2021/cellprofiler-nf/input_data/20220420_testproject/Analysis-20251110/CP_output/p002_B01

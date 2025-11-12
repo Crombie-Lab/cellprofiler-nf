@@ -1,0 +1,2 @@
+task_id	hash	native_id	name	status	exit	submit	duration	realtime	%cpu	peak_rss	peak_vmem	rchar	wchar
+1	6b/1e447a	136955	CP_Array (slurm-array)	COMPLETED	0	2025-11-12 10:59:54.487	2m 5s	1m 3s	100.8%	463 MB	3.9 GB	142 MB	3.7 MB

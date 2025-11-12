@@ -1,0 +1,30 @@
+CellProfiler Pipeline: http://www.cellprofiler.org
+Version:5
+
+Default Input Folder: .
+Default Output Folder: ./_cp_out
+
+Module: LoadData
+    ModuleNum: 1
+    Enabled: True
+    Load from a file: Yes
+    File name: Experiment.csv
+    Base image location: Default Input Folder
+    Set the joining columns: No
+    Group images by metadata: No
+
+Module: NamesAndTypes
+    ModuleNum: 2
+    Enabled: True
+    Select the type of images you want to load: Grayscale image
+    Name to assign these images: RawBF
+    Select the image location: Load images based on this data: LoadData
+
+Module: SaveImages
+    ModuleNum: 3
+    Enabled: True
+    Select the image to save: RawBF
+    Select the image file format: tif
+    Output file location: Default Output Folder
+    Create subfolders in the output folder: No
+    File name: saved_image
