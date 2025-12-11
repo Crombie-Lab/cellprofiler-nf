@@ -1,55 +1,49 @@
 #!/usr/bin/env Rscript
-library(fs)
-library(dplyr)
-library(tidyr)
-library(tibble)
-library(stringr)
-library(readr)
-library(glue)
-library(purrr)
 
-#==============================================================================#
-# Arguments
-#==============================================================================#
-# 1 - out directory path
-#args <- c("/projects/b1059/projects/Tim/cellprofiler-nf/debug/20220501_toxinDebug/Analysis-20230126")
 args <- commandArgs(trailingOnly = TRUE)
+out_dir <- args[1]
 
-#==============================================================================#
-# Read CP output data
-#==============================================================================#
-# get the output for each model
-dir <- glue::glue("{args[1]}/processed_data")
+cat("[INFO] R: Starting toxin aggregation\n")
 
-# get the wormobject data too
-PrimaryObjects <- readr::read_csv(file = dir %>% fs::dir_ls(regexp = "WormObjects\\.csv$")) %>%
-  dplyr::select(FileName_RawBF, ObjectNumber, AreaShape_Area:AreaShape_Solidity) %>%
-  rename_all(.vars = 2:27, ~ paste0("po_", .x))
+csv_dir <- file.path(out_dir, "processed_data")
+if (!dir.exists(csv_dir)) {
+  stop("processed_data directory does not exist: ", csv_dir)
+}
 
-# read in files and manipulate with  
-model_df_raw <- dir %>%
-  fs::dir_ls(regexp = "_NonOverlappingWorms\\.csv$") %>% # find paths to csvs in dir
-  purrr::map_dfr(readr::read_csv, .id = "model") %>%
-  dplyr::mutate(Metadata_Date = as.integer(Metadata_Date), 
-                model = stringr::str_remove_all(fs::path_file(as.character(model)), pattern = "_NonOverlappingWorms|.csv"),
-                model = paste0(model, ".model.outputs")) %>%
-  dplyr::arrange(model, ImageNumber)
+files <- list.files(csv_dir, pattern = "\\.csv$", full.names = TRUE)
 
-# join the model outputs with the primary object shape data
-model_df <- model_df_raw %>%
-  dplyr::left_join(PrimaryObjects, by = c("FileName_RawBF" = "po_FileName_RawBF", "Parent_WormObjects" = "po_ObjectNumber"))
+if (length(files) == 0) {
+  cat("[WARN] No CSV files found in processed_data\n")
+  quit(save="no")
+}
 
-# split to list
-model_df_list <- split.data.frame(model_df, model_df$model)
+cat("[INFO] R: Found", length(files), "CSV files\n")
 
-# export list items to global env
-lapply(seq_along(model_df_list), function(i) assign(names(model_df_list)[i], model_df_list[[i]], envir = .GlobalEnv))
+merge_all <- NULL
 
-# save as R.data
-proj_name <- stringr::str_extract(args[1], pattern = "[^\\/]+(?=(?:\\/[^\\/]+){1}$)")
-run_stamp <- stringr::str_extract(args[1], pattern = "([^/]+$)")
-save(list = c(ls(pattern = "model.outputs|wormobj")),
-     file = glue::glue("{args[1]}/processed_data/{proj_name}_{run_stamp}.RData"))
+for (f in files) {
+  cat("[INFO] Reading:", f, "\n")
+  df <- tryCatch(
+    read.csv(f, stringsAsFactors = FALSE),
+    error = function(e) {
+      cat("[WARN] Failed to read", f, "\n")
+      return(NULL)
+    }
+  )
+  
+  if (!is.null(df) && nrow(df) > 0) {
+    df$SourceModel <- basename(f)
+    merge_all <- rbind(merge_all, df)
+  }
+}
 
-# clean up extra CP_outputs for now
-system(command = glue::glue("if [ -d {args[1]}/CP_output ]; then rm -Rf {args[1]}/CP_output; fi"))
+if (is.null(merge_all)) {
+  cat("[WARN] No valid CSV data to merge\n")
+  quit(save="no")
+}
+
+outfile <- file.path(out_dir, "ALL_MODELS_MERGED.csv")
+write.csv(merge_all, outfile, row.names = FALSE)
+
+cat("[INFO] R: Finished. Output written to:\n")
+cat(outfile, "\n")

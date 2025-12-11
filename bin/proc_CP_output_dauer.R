@@ -1,45 +1,81 @@
-# /usr/bin/Rscript
-library(fs)
-library(dplyr)
-library(tidyr)
-library(tibble)
-library(stringr)
-library(readr)
-library(glue)
-library(purrr)
+#!/usr/bin/env Rscript
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(readr)
+  library(tidyr)
+})
 
-#==============================================================================#
-# Arguments
-#==============================================================================#
-# 1 - out directory path
 args <- commandArgs(trailingOnly = TRUE)
+outdir <- args[1]
 
-#==============================================================================#
-# Read CP output data
-#==============================================================================#
-# get the output for each model
-dir <- glue::glue("{args[1]}/processed_data")
+# -------------------------------------------------------------------------
+# Helper: safe read
+# -------------------------------------------------------------------------
+safe_read <- function(path) {
+  if (length(path) == 0) return(NULL)
+  df <- try(read_csv(path, show_col_types = FALSE), silent = TRUE)
+  if (inherits(df, "try-error")) return(NULL)
+  if (nrow(df) == 0) return(NULL)
+  df
+}
 
-# read in files and manipulate with  
-model_df <- dir %>%
-  fs::dir_ls(regexp = "\\.csv$") %>% # find paths to csvs in dir
-  purrr::map_dfr(readr::read_csv, .id = "model") %>%
-  dplyr::mutate(Metadata_Date = as.integer(Metadata_Date), 
-                model = stringr::str_remove(fs::path_file(as.character(model)), pattern = ".csv"),
-                model = paste0(model, ".model.outputs")) %>%
-  dplyr::arrange(model, ImageNumber)
+# -------------------------------------------------------------------------
+# Locate files
+# -------------------------------------------------------------------------
+m1_file <- list.files(file.path(outdir, "processed_data"),
+                      pattern = "dauerMod_NonOverlappingWorms.csv",
+                      full.names = TRUE)
 
-# split to list
-model_df_list <- split.data.frame(model_df, model_df$model)
+m2_file <- list.files(file.path(outdir, "processed_data"),
+                      pattern = "nondauerMod_NonOverlappingWorms.csv",
+                      full.names = TRUE)
 
-# export list items to global env
-lapply(seq_along(model_df_list), function(i) assign(names(model_df_list)[i], model_df_list[[i]], envir = .GlobalEnv))
+# -------------------------------------------------------------------------
+# Load files safely
+# -------------------------------------------------------------------------
+df1 <- safe_read(m1_file)
+df2 <- safe_read(m2_file)
 
-# save as R.data
-proj_name <- stringr::str_extract(args[1], pattern = "[^\\/]+(?=(?:\\/[^\\/]+){1}$)")
-run_stamp <- stringr::str_extract(args[1], pattern = "([^/]+$)")
-save(list = c(ls(pattern = "model.outputs")),
-     file = glue::glue("{args[1]}/processed_data/{proj_name}_{run_stamp}.RData"))
+# If both empty, create placeholder
+if (is.null(df1) && is.null(df2)) {
+  message("WARNING: No dauer outputs found. Creating empty summary.")
+  write_csv(tibble(Message="NO_WORMS_DETECTED"), 
+            file.path(outdir, "dauer_summary.csv"))
+  quit(save="no")
+}
 
-# clean up extra CP_outputs for now
-system(command = glue::glue("if [ -d {args[1]}/CP_output ]; then rm -Rf {args[1]}/CP_output; fi"))
+# Add model column
+if (!is.null(df1)) df1 <- df1 %>% mutate(model="dauer")
+if (!is.null(df2)) df2 <- df2 %>% mutate(model="nondauer")
+
+# Merge available data
+combined <- bind_rows(df1, df2)
+
+# -------------------------------------------------------------------------
+# Fix missing columns safely
+# -------------------------------------------------------------------------
+# If column missing, add NA
+needed <- c("ImageNumber","Metadata_Date","Metadata_Well","Metadata_Plate")
+
+for (nm in needed) {
+  if (!nm %in% names(combined)) {
+    combined[[nm]] <- NA
+  }
+}
+
+# Clean Metadata_Date
+combined <- combined %>%
+  mutate(Metadata_Date = suppressWarnings(as.integer(Metadata_Date)))
+
+# -------------------------------------------------------------------------
+# Save outputs
+# -------------------------------------------------------------------------
+write_csv(combined, file.path(outdir, "dauer_all_raw.csv"))
+
+summary_tbl <- combined %>%
+  group_by(model) %>%
+  summarise(count = n(), .groups="drop")
+
+write_csv(summary_tbl, file.path(outdir, "dauer_summary.csv"))
+
+message("✓ proc_CP_output_dauer.R completed successfully")

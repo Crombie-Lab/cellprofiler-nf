@@ -1,3 +1,0 @@
-[Tue Nov 11 01:18:59 AM EST 2025] START id=3
-[31mFATAL:  [0m Couldn't determine user account information: user: unknown userid 737332802
-[Tue Nov 11 01:18:59 AM EST 2025] DONE id=3
