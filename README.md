@@ -51,6 +51,7 @@ nextflow run main.nf \
   --array_concurrency 3
 ________________________________________
 cellprofiler-nf help
+
 C E L L P R O F I L E R  -  N E X T F L O W
 ===============================================
 
@@ -68,15 +69,16 @@ Optional arguments:
 --array_size          SLURM array size (default set in main.nf)
 --array_concurrency   Max concurrent array tasks
 --slurm_partition     SLURM partition (default: long)
-________________________________________
+
+
 Input directory structure
 Each project directory must contain a raw_images/ folder.
 Dauer input example
 20220501_dauerDebug/
-├── raw_images
-│   ├── 20220501_dauerDebug-p002-m2X_A01_w1.TIF
-│   ├── 20220501_dauerDebug-p002-m2X_A01_w2.TIF
-│   └── ...
+├──  raw_images
+│    ├──  20220501_dauerDebug-p002-m2X_A01_w1.TIF
+│    ├──  20220501_dauerDebug-p002-m2X_A01_w2.TIF
+│    └──  ...
 Toxin input example
 20220501_toxinDebug/
 ├── raw_images
@@ -104,7 +106,7 @@ Analysis-YYYYMMDD/
 │   └── <per-group CellProfiler outputs>
 ├── processed_data/
 ├── processed_images/
----_
+---
 Dauer output example
 processed_data/
 └── 20220501_dauerDebug_Analysis-YYYYMMDD.RData
@@ -114,7 +116,7 @@ processed_images/
 ├── *_dauerMod_straightened_RFP.png
 ├── *_nondauerMod_straightened_RFP.png
 └── ...
-________________________________________
+---
 Toxin output example
 processed_data/
 └── 20220501_toxinDebug_Analysis-YYYYMMDD.RData
@@ -122,7 +124,7 @@ processed_data/
 processed_images/
 ├── *_overlay.png
 └── ...
-________________________________________
+---
 How SLURM array execution works
 1.	config_CP_input:
 o	Builds pipeline.cppipe
@@ -137,7 +139,7 @@ o	Merges CSV outputs
 o	Collects images
 o	Generates final RData files
 This design scales to hundreds of wells without code changes.
-________________________________________
+---
 Dependencies
 Option 1: HPC environment (recommended)
 -	Nextflow ≥ 20
@@ -146,7 +148,7 @@ Option 1: HPC environment (recommended)
 -	R (with required packages)
 -	CellProfiler (inside Singularity image)
 On ai-panther, these are already available.
-________________________________________
+---
 Option 2: Docker (local testing)
 If using Docker, you do not need to install dependencies manually.
 Example (conceptual):
