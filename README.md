@@ -1,26 +1,29 @@
-cellprofiler-nf
+Cellprofiler-nf
+
 A Nextflow pipeline to run CellProfiler pipelines on raw images with SLURM array execution and standardized post-processing.
 
 Pipeline overview
+
 cellprofiler-nf is a Nextflow + CellProfiler pipeline designed to process large microscopy image datasets using SLURM array jobs.
 Each metadata group (e.g., plate/well) is processed as a separate array task, allowing efficient parallel execution on HPC systems such as ai-panther.
 The pipeline supports two CellProfiler workflows:
-•	dauer
-•	toxin
+-	dauer
+-	toxin
 Both pipelines:
-•	Read raw images
-•	Generate metadata and grouping
-•	Run CellProfiler headless
-•	Merge outputs into clean, analysis-ready results
-________________________________________
+-	Read raw images
+-	Generate metadata and grouping
+-	Run CellProfiler headless
+-	Merge outputs into clean, analysis-ready results
+---
 Key features
-•	SLURM array job execution (one task per metadata group)
-•	Supports dauer and toxin CellProfiler pipelines
-•	Clean, reproducible directory structure
-•	Automatic metadata + grouping generation
-•	Post-processing of CSV outputs and images
-•	Designed for HPC use, not laptop hacks
-________________________________________
+-	SLURM array job execution (one task per metadata group)
+-	Supports dauer and toxin CellProfiler pipelines
+-	Clean, reproducible directory structure
+-	Automatic metadata + grouping generation
+-	Post-processing of CSV outputs and images
+-	Designed for HPC use, not laptop hacks
+
+---
 ai-panther usage
 # clone the repository
 git clone https://github.com/AndersenLab/cellprofiler-nf.git
@@ -85,7 +88,7 @@ Naming conventions
 Date-Experiment-Plate-Magnification_Well_Wavelength.TIF
 •	Toxin
 Date-Experiment-Plate-Magnification_Well.TIF
-________________________________________
+---
 Output directory structure
 By default, outputs are written to:
 <project>/Analysis-YYYYMMDD/
@@ -101,7 +104,7 @@ Analysis-YYYYMMDD/
 │   └── <per-group CellProfiler outputs>
 ├── processed_data/
 ├── processed_images/
-________________________________________
+---_
 Dauer output example
 processed_data/
 └── 20220501_dauerDebug_Analysis-YYYYMMDD.RData
@@ -137,11 +140,11 @@ This design scales to hundreds of wells without code changes.
 ________________________________________
 Dependencies
 Option 1: HPC environment (recommended)
-•	Nextflow ≥ 20
-•	SLURM
-•	Singularity
-•	R (with required packages)
-•	CellProfiler (inside Singularity image)
+-	Nextflow ≥ 20
+-	SLURM
+-	Singularity
+-	R (with required packages)
+-	CellProfiler (inside Singularity image)
 On ai-panther, these are already available.
 ________________________________________
 Option 2: Docker (local testing)
